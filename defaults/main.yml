@@ -1,0 +1,75 @@
+---
+# defaults file for ansible-zabbix-agent
+
+
+zabbix_agent_package: zabbix-agent2-5.0.3-1.el7.x86_64.rpm
+zabbix_package_dir: /tmp/
+zabbix_agent_server: 10.110.110.227
+zabbix_agent_serveractive: 10.110.110.227
+zabbix_agent_hostname: "{{ ansible_hostname }}"
+zabbix_agent: zabbix-agent2
+zabbix_agent_service: zabbix-agent2
+zabbix_agent_conf: /etc/zabbix/zabbix_agent2.conf
+zabbix_agent_listenport: 10050
+
+
+# Override Ansible specific facts
+zabbix_agent_distribution_major_version: "{{ ansible_distribution_major_version }}"
+zabbix_agent_distribution_release: "{{ ansible_distribution_release }}"
+zabbix_agent_os_family: "{{ ansible_os_family }}"
+
+
+# Zabbix configuration variables
+zabbix_agent_pidfile: /var/run/zabbix/zabbix_agent2.pid
+zabbix_agent_logfile: /var/log/zabbix/zabbix_agent2.log
+zabbix_agent_logfilesize: 100
+zabbix_agent_include: /etc/zabbix/zabbix_agent2.d
+zabbix_agent_timeout: 3
+zabbix_agent_controlsocket: /tmp/agent.sock
+
+
+
+# Windows Related
+zabbix_agent_win_logfile: 'C:\Zabbix\zabbix_agent2.log'
+zabbix_agent_win_include: 'C:\Zabbix\zabbix_agent2.d\'
+zabbix_agent_win_controlsocket: 'C:\Zabbix\agent.sock'
+
+# Zabbix role related vars
+zabbix_install_pip_packages: true
+
+
+# Zabbix API stuff
+zabbix_agent_server_url: "https://10.110.110.227/"
+zabbix_url: "{{ zabbix_agent_server_url }}"
+# zabbix_api_http_user: admin
+# zabbix_api_http_password: admin
+zabbix_api_user: Admin
+zabbix_api_pass: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          34643365313162356139373832303935356565393862376166383736396365333434653538616139
+          3061323236643530306434643363626463323433643261610a316133323965613035393837336630
+          36653166386464643236613365656639316164303664346335653333636231633933363235353630
+          3866646662383736360a346332623832623061613932653833313263656130626434613433306432
+          3039
+zabbix_validate_certs: False
+zabbix_api_create_hostgroup: True
+zabbix_api_create_hosts: True
+zabbix_create_hostgroup: present  # or absent
+zabbix_create_host: present       # or absent
+zabbix_update_host: yes
+zabbix_host_status: enabled       # or disabled
+zabbix_proxy: null
+zabbix_inventory_mode: disabled
+zabbix_useuip: 1
+zabbix_host_groups:
+  - Linux servers
+zabbix_link_templates:
+  - Template OS Linux by Zabbix agent
+#  - Template App Zabbix Server
+zabbix_agent_interfaces:
+  - type: 1
+    main: 1
+    useip: "{{ zabbix_useuip }}"
+    ip: "{{ zabbix_agent_ip }}"
+    dns: "{{ ansible_fqdn }}"
+    port: "{{ zabbix_agent_listenport }}"

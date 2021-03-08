@@ -1,0 +1,53 @@
+---
+# Tasks specific for RedHat systems
+- name: "Set default ip address for zabbix_agent_ip"
+  set_fact:
+    zabbix_agent_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4'].address }}"
+  when:
+    - zabbix_agent_ip is not defined
+    - "'ansible_default_ipv4' in hostvars[inventory_hostname]"
+
+- name: Copy zabbix-agent2 package with owner and permissions
+  copy:
+    src: "{{ zabbix_agent_package }}"
+    dest: "{{ zabbix_package_dir }}"
+    mode: '0755'
+  tags:
+    - init
+    - zabbix-agent
+
+- name: install zabbix-agent2 rpm from a local file
+  yum:
+    name: "{{ zabbix_package_dir }}{{ zabbix_agent_package }}"
+    state: present
+  tags:
+    - init
+    - zabbix-agent
+
+- name: config zabbix-agent2
+  template:
+    src: zabbix_agent2_linux.conf.j2
+    dest: "{{ zabbix_agent_conf }}"
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+    - init
+    - zabbix-agent
+
+- name: "RedHat | Enable the service"
+  service:
+    name: "{{ zabbix_agent_service }}"
+    enabled: yes
+    use: service
+  tags:
+    - zabbix-agent
+    - init
+    - service
+
+- name: Start service, if not started
+  service:
+    name: "{{ zabbix_agent_service }}"
+    state: started
+
+
